@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <EditText
+        android:id="@+id/ao_delta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Operation delta"
+        android:inputType="numberSigned" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/ao_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Comment" />
+
+    <EditText
+        android:id="@+id/ao_tags"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Tags (one tag per line)"
+        android:inputType="textMultiLine" />
+
+</LinearLayout>
