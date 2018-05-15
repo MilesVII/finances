@@ -13,10 +13,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
+	public static final String ST_SAVING = "save";
+	
 	private LinearLayout operationsList;
 	private Button newOperation;
 	private TextView fundsAvailable;
 	private ArrayList<Operation> operations;
+	private ArrayList<SavingAccount> accounts = new ArrayList<SavingAccount>();
 	public static MainActivity antistatic;
 	
 	@Override
@@ -55,18 +58,47 @@ public class MainActivity extends Activity {
 		case (R.id.mm_export):
 			export();
 			break;
+		case (R.id.mm_specialtags):
+			Utils.shout("Use #save:<name> tag to transfer digits to your saving account");
+			break;
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
 	public void syncOperations(){
-		int balance = 0;
+		int balance = 0, total = 0;;
 		operationsList.removeAllViews();
-		for (Operation whiteops: operations){
-			operationsList.addView(new OperationView(this, whiteops));
-			balance += whiteops.delta;
+		accounts.clear();
+		for (int i = operations.size() - 1; i >= 0; --i){
+			operationsList.addView(new OperationView(this, operations.get(i)));
+			
+			String san = Utils.checkSpecialTag(operations.get(i).tags, ST_SAVING);
+			if (san != null){
+				SavingAccount sa = Utils.findAccount(accounts, san);
+				if (sa == null){
+					sa = new SavingAccount(san);
+					accounts.add(sa);
+				}
+				sa.balance -= operations.get(i).delta;
+				total -= operations.get(i).delta;
+			}
+			
+			balance += operations.get(i).delta;
+			total += operations.get(i).delta;
 		}
-		fundsAvailable.setText("Available: " + balance);
+		
+		StringBuilder sb = new StringBuilder("Available: ");
+		sb.append(balance);
+		sb.append(" (");
+		sb.append(total);
+		sb.append(" on card)\nSaving Accounts:");
+		for (SavingAccount sa: accounts){
+			sb.append('\n');
+			sb.append(sa.name);
+			sb.append(": ");
+			sb.append(sa.balance);
+		}
+		fundsAvailable.setText(sb.toString());
 	}
 	
 	public void add(Operation operation){

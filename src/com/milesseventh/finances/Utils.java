@@ -7,9 +7,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.widget.Toast;
 
 public class Utils {
 	private static String ACTIVE_DB = "active";
@@ -50,7 +52,37 @@ public class Utils {
 		return null;
 	}
 
-	public static void copy(Context ctxt, String txt){
-		((ClipboardManager) ctxt.getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText(ctxt.getPackageName(), txt));
+	public static String checkSpecialTag(ArrayList<String> tags, String stag){
+		for (String tag: tags)
+			if (tag.startsWith(stag) && tag.contains(":"))
+				return tag.split(":")[1];
+		return null;
+	}
+	
+	/*public static boolean contains(ArrayList<String> source, String target){
+		for (String runhorsey: source)
+			if (runhorsey.equals(target))
+				return true;
+		return false;
+	}*/
+	
+	public static SavingAccount findAccount(ArrayList<SavingAccount> source, String target){
+		for (SavingAccount runhorsey: source)
+			if (runhorsey.name.equals(target))
+				return runhorsey;
+		return null;
+	}
+	
+	public static void copy(Context ctxt, String text){
+		((ClipboardManager) ctxt.getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText(ctxt.getPackageName(), text));
+	}
+	
+	public static void shout(final String text){
+		MainActivity.antistatic.runOnUiThread(new Runnable(){
+			@Override
+			public void run() {
+				Toast.makeText(MainActivity.antistatic, text, Toast.LENGTH_LONG).show();
+			}
+		});
 	}
 }

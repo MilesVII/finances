@@ -32,7 +32,7 @@ public class OperationView extends LinearLayout {
 			sb.append(tag);
 			sb.append(' ');
 		}
-		tags.setText(sb);
+		tags.setText(sb.toString());
 		addView(tags);
 		
 		LinearLayout controls = new LinearLayout(context);
