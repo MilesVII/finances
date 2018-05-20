@@ -11,10 +11,12 @@ public class Operation implements Serializable {
 	public ArrayList<String> tags = new ArrayList<String>();
 	//public Instant timeStamp;
 	
-	public Operation(int ndelta, String rawComment, String rawTags) {
+	public Operation(int ndelta, String rawComment, String[] intags) {
 		delta = ndelta;
 		comment = rawComment.replace("r", "").replace("\n", "\\").trim();
-		for (String rawTag: rawTags.split("\n"))
-			tags.add(rawTag.split(" ")[0].toLowerCase().trim());
+		//for (String rawTag: rawTags.split("\n"))
+		//	tags.add(Utils.sanitizeTag(rawTag));
+		for (String tag: intags)
+			tags.add(tag);
 	}
 }

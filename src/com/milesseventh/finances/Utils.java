@@ -59,12 +59,12 @@ public class Utils {
 		return null;
 	}
 	
-	/*public static boolean contains(ArrayList<String> source, String target){
+	public static boolean contains(ArrayList<String> source, String target){
 		for (String runhorsey: source)
 			if (runhorsey.equals(target))
 				return true;
 		return false;
-	}*/
+	}
 	
 	public static SavingAccount findAccount(ArrayList<SavingAccount> source, String target){
 		for (SavingAccount runhorsey: source)
@@ -84,5 +84,9 @@ public class Utils {
 				Toast.makeText(MainActivity.antistatic, text, Toast.LENGTH_LONG).show();
 			}
 		});
+	}
+	
+	public static String sanitizeTag(String tag){
+		return tag.split(" ")[0].replace('#', ' ').toLowerCase().trim();
 	}
 }

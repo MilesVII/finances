@@ -64,6 +64,16 @@ public class MainActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	public String[] getListOfAllUsedTags(){
+		ArrayList<String> tags = new ArrayList<String>();
+		for (Operation o: operations)
+			for (String tag: o.tags)
+				if (!Utils.contains(tags, tag))
+					tags.add(tag);
+		String[] out = new String[tags.size()];
+		return tags.toArray(out);
+	}
 
 	public void syncOperations(){
 		int balance = 0, total = 0;;
@@ -103,6 +113,14 @@ public class MainActivity extends Activity {
 	
 	public void add(Operation operation){
 		operations.add(operation);
+		syncOperations();
+		Utils.save(this, operations, null);
+	}	
+	
+	public void replace(Operation source, Operation noperation){
+		int knife = operations.indexOf(source);
+		operations.remove(source);
+		operations.add(knife, noperation);
 		syncOperations();
 		Utils.save(this, operations, null);
 	}

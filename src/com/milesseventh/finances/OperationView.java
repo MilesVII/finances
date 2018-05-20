@@ -40,6 +40,14 @@ public class OperationView extends LinearLayout {
 		controls.setOrientation(LinearLayout.HORIZONTAL);
 		bEdit = new Button(context);
 		bEdit.setText("Edit");
+		bEdit.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View arg0) {
+				LogOperationDialog lod = new LogOperationDialog();
+				lod.editSource = data;
+				lod.show(MainActivity.antistatic.getFragmentManager(), "");
+			}
+		});
 		controls.addView(bEdit);
 		bDelete = new Button(context);
 		bDelete.setText("Remove");
