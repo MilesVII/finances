@@ -7,7 +7,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -88,5 +87,14 @@ public class Utils {
 	
 	public static String sanitizeTag(String tag){
 		return tag.split(" ")[0].replace('#', ' ').toLowerCase().trim();
+	}
+	
+	public static boolean isParseable(String data){
+		try{
+			Integer.parseInt(data);
+			return true;
+		} catch (Exception e){
+			return false;
+		}
 	}
 }

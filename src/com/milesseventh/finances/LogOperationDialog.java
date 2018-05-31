@@ -56,11 +56,17 @@ public class LogOperationDialog extends DialogFragment {
 		}).setPositiveButton("Submit", new OnClickListener(){
 			@Override
 			public void onClick(DialogInterface unused, int unusedtoo) {
+				at.callOnClick();
+				
+				//Conversion of tag editor data into list of tags
+				String[] t = new String[tl.getChildCount()];
+				for (int i = 0; i < t.length; ++i){
+					t[i] = ((TagView)tl.getChildAt(i)).tag;
+					/*if (t[i].startsWith(MainActivity.ST_USE))
+						executeUseTag(t[i], d);*/
+				}
+				
 				if (!d.getText().toString().trim().isEmpty()){
-					String[] t = new String[tl.getChildCount()];
-					for (int i = 0; i < t.length; ++i)
-						t[i] = ((TagView)tl.getChildAt(i)).tag;
-					
 					if (editSource == null)
 						MainActivity.antistatic.add(
 							new Operation(
@@ -80,8 +86,19 @@ public class LogOperationDialog extends DialogFragment {
 				}
 			}
 		});
-
 		return builder.create();
 	}
 	
+	/*public void executeUseTag(String tag, EditText et){
+		String[] useTag = tag.split(":");
+		if (useTag.length >= 3)
+			for (SavingAccount sa: MainActivity.antistatic.accounts)
+				if (sa.name.equals(useTag[1])){
+					try{
+						et.setText("" + (sa.balance - Integer.parseInt(useTag[2])));
+						sa.balance = 0;
+						break;
+					} catch (Exception e){}
+				}
+	}*/
 }

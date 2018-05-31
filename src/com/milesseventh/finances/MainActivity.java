@@ -13,13 +13,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-	public static final String ST_SAVING = "save";
-	
 	private LinearLayout operationsList;
 	private Button newOperation;
 	private TextView fundsAvailable;
 	private ArrayList<Operation> operations;
-	private ArrayList<SavingAccount> accounts = new ArrayList<SavingAccount>();
+	public ArrayList<SavingAccount> accounts = new ArrayList<SavingAccount>();
 	public static MainActivity antistatic;
 	
 	@Override
@@ -59,7 +57,9 @@ public class MainActivity extends Activity {
 			export();
 			break;
 		case (R.id.mm_specialtags):
-			Utils.shout("Use #save:<name> tag to transfer digits to your saving account");
+			Utils.shout("Use #save:<name> tag to transfer digits to your saving account\n"
+			          + "#use:<name>:<price> when buying goods using before-saved money\n"
+			          + "#kill:<name> to liquidate saving account and make it's savings available");
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -76,27 +76,52 @@ public class MainActivity extends Activity {
 	}
 
 	public void syncOperations(){
-		int balance = 0, total = 0;;
+		//Render operation history
 		operationsList.removeAllViews();
 		accounts.clear();
 		for (int i = operations.size() - 1; i >= 0; --i){
 			operationsList.addView(new OperationView(this, operations.get(i)));
-			
-			String san = Utils.checkSpecialTag(operations.get(i).tags, ST_SAVING);
-			if (san != null){
-				SavingAccount sa = Utils.findAccount(accounts, san);
-				if (sa == null){
-					sa = new SavingAccount(san);
-					accounts.add(sa);
-				}
-				sa.balance -= operations.get(i).delta;
-				total -= operations.get(i).delta;
-			}
-			
-			balance += operations.get(i).delta;
-			total += operations.get(i).delta;
 		}
 		
+		//Process savings balance
+		int balance = 0, total = 0;;
+		SavingAccount greedy;
+		
+		for (Operation horsey: operations){
+			switch(horsey.getType()){
+			case DEFAULT:
+				balance += horsey.delta;
+				total += horsey.delta;
+				break;
+			case SAVE:
+				greedy = Utils.findAccount(accounts, horsey.tagarg1);
+				if (greedy == null){
+					greedy = new SavingAccount(horsey.tagarg1);
+					accounts.add(greedy);
+				}
+				greedy.balance -= horsey.delta;
+				break;
+			case USE:
+				greedy = Utils.findAccount(accounts, horsey.tagarg1);
+				if (greedy != null){
+					balance += greedy.balance - horsey.tagargnum;
+					total -= horsey.tagargnum;
+					accounts.remove(greedy);
+				}
+				break;
+			case KILL:
+				greedy = Utils.findAccount(accounts, horsey.tagarg1);
+				if (greedy != null){
+					balance += greedy.balance;
+					accounts.remove(greedy);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		
+		////////////////////////////////////
 		StringBuilder sb = new StringBuilder("Available: ");
 		sb.append(balance);
 		sb.append(" (");
