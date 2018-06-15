@@ -28,7 +28,7 @@ public class Operation implements Serializable {
 	public Date timeStamp;
 	
 	public Operation(int ndelta, String rawComment, String[] intags){
-		new Operation(ndelta, rawComment, intags, Calendar.getInstance().getTime());
+		this(ndelta, rawComment, intags, Calendar.getInstance().getTime());
 	}
 	
 	public Operation(int ndelta, String rawComment, String[] intags, Date ntimeStamp){
