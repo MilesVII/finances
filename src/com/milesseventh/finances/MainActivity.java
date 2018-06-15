@@ -82,7 +82,7 @@ public class MainActivity extends Activity {
 		for (int i = operations.size() - 1; i >= 0; --i){
 			operationsList.addView(new OperationView(this, operations.get(i)));
 		}
-		
+
 		//Process savings balance
 		int balance = 0, total = 0;;
 		SavingAccount greedy;
@@ -99,13 +99,14 @@ public class MainActivity extends Activity {
 					greedy = new SavingAccount(horsey.tagarg1);
 					accounts.add(greedy);
 				}
-				greedy.balance -= horsey.delta;
+				greedy.balance -= horsey.delta; //add operation delta to saving account
+				balance += horsey.delta;        //remove operation delta from available funds
 				break;
 			case USE:
 				greedy = Utils.findAccount(accounts, horsey.tagarg1);
 				if (greedy != null){
-					balance += greedy.balance - horsey.tagargnum;
-					total -= horsey.tagargnum;
+					balance += greedy.balance - horsey.tagargnum; //add fred funds to available
+					total -= horsey.tagargnum;                    //remove spent money from card
 					accounts.remove(greedy);
 				}
 				break;
@@ -140,7 +141,7 @@ public class MainActivity extends Activity {
 		operations.add(operation);
 		syncOperations();
 		Utils.save(this, operations, null);
-	}	
+	}
 	
 	public void replace(Operation source, Operation noperation){
 		int knife = operations.indexOf(source);

@@ -2,6 +2,8 @@ package com.milesseventh.finances;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class Operation implements Serializable {
 	private static final long serialVersionUID = -3382758464165988286L;
@@ -23,15 +25,20 @@ public class Operation implements Serializable {
 	public int delta;
 	public String comment;
 	public ArrayList<String> tags = new ArrayList<String>();
-	//public Instant timeStamp;
+	public Date timeStamp;
 	
-	public Operation(int ndelta, String rawComment, String[] intags) {
+	public Operation(int ndelta, String rawComment, String[] intags){
+		new Operation(ndelta, rawComment, intags, Calendar.getInstance().getTime());
+	}
+	
+	public Operation(int ndelta, String rawComment, String[] intags, Date ntimeStamp){
 		delta = ndelta;
-		comment = rawComment.replace("r", "").replace("\n", "\\").trim();
+		comment = rawComment.replace("\r", "").replace("\n", "\\").trim();
 		//for (String rawTag: rawTags.split("\n"))
 		//	tags.add(Utils.sanitizeTag(rawTag));
 		for (String tag: intags)
 			tags.add(tag);
+		timeStamp = ntimeStamp;
 	}
 	
 	public void checkTagSetTypeValidity(){

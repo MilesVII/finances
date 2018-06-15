@@ -1,5 +1,7 @@
 package com.milesseventh.finances;
 
+import java.util.Calendar;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
@@ -27,6 +29,11 @@ public class OperationView extends LinearLayout {
 		
 		tags = new TextView(context);
 		StringBuilder sb = new StringBuilder();
+		if (data.timeStamp == null)
+			sb.append("NO TIMESTAMP DATA");
+		else
+			sb.append(data.timeStamp.toLocaleString());
+		sb.append('\n');
 		for (String tag: data.tags){
 			sb.append('#');
 			sb.append(tag);

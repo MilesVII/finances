@@ -80,7 +80,8 @@ public class LogOperationDialog extends DialogFragment {
 								new Operation(
 									Integer.parseInt(d.getText().toString()), 
 									c.getText().toString(), 
-									t
+									t,
+									editSource.timeStamp
 								)
 							);
 				}
