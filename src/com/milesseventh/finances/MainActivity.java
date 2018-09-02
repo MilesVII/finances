@@ -19,6 +19,20 @@ public class MainActivity extends Activity {
 	private ArrayList<Operation> operations;
 	public ArrayList<SavingAccount> accounts = new ArrayList<SavingAccount>();
 	public static MainActivity antistatic;
+
+	private OnClickListener logOperationButton = new OnClickListener(){
+			@Override
+			public void onClick(View unused) {
+				LogOperationDialog lod = new LogOperationDialog();
+				lod.show(getFragmentManager(), "");
+			}
+		};
+	private OnClickListener cancelSearchButton = new OnClickListener(){
+			@Override
+			public void onClick(View me) {
+				syncOperations(null);
+			}
+		};
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -29,17 +43,11 @@ public class MainActivity extends Activity {
 		fundsAvailable = (TextView)findViewById(R.id.funds_available);
 		
 		newOperation = (Button)findViewById(R.id.add_operation);
-		newOperation.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View unused) {
-				LogOperationDialog lod = new LogOperationDialog();
-				lod.show(getFragmentManager(), "");
-			}
-		});
+		newOperation.setOnClickListener(logOperationButton);
 		
 		operationsList = (LinearLayout)findViewById(R.id.main_list);
 		operations = Utils.load(this, null);
-		syncOperations();
+		syncOperations(null);
 	}
 	
 	@Override
@@ -52,14 +60,23 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()){
 		case (R.id.mm_month):
+			Utils.shout("Feature is to be deleted");
 			break;
 		case (R.id.mm_export):
 			export();
 			break;
+		case (R.id.mm_import):
+			dbimport();
+			break;
 		case (R.id.mm_specialtags):
 			Utils.shout("Use #save:<name> tag to transfer digits to your saving account\n"
+			          + "#invest:<name> add real money to investment account"
 			          + "#use:<name>:<price> when buying goods using before-saved money\n"
 			          + "#kill:<name> to liquidate saving account and make it's savings available");
+			break;
+		case (R.id.mm_search):
+			SearchDialog sd = new SearchDialog();
+			sd.show(getFragmentManager(), "");
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -75,12 +92,30 @@ public class MainActivity extends Activity {
 		return tags.toArray(out);
 	}
 
-	public void syncOperations(){
+	public void search(String query){
+		syncOperations(query);
+	}
+	
+	public void syncOperations(String tagquery){
+		if (tagquery == null){
+			newOperation.setText("Log Operation");
+			newOperation.setOnClickListener(logOperationButton);;
+		} else {
+			newOperation.setText("Cancel Search");
+			newOperation.setOnClickListener(cancelSearchButton);
+		}
+		
 		//Render operation history
 		operationsList.removeAllViews();
 		accounts.clear();
+		
+		int searchBalance = 0;
+		
 		for (int i = operations.size() - 1; i >= 0; --i){
-			operationsList.addView(new OperationView(this, operations.get(i)));
+			if (tagquery == null || Utils.containsPartial(operations.get(i).tags, tagquery)){
+				operationsList.addView(new OperationView(this, operations.get(i)));
+				searchBalance += operations.get(i).delta;
+			}
 		}
 
 		//Process savings balance
@@ -88,30 +123,41 @@ public class MainActivity extends Activity {
 		SavingAccount greedy;
 		
 		for (Operation horsey: operations){
-			switch(horsey.getType()){
+			Operation.OTDContainer otd = horsey.getType();
+			switch(otd.type){
 			case DEFAULT:
 				balance += horsey.delta;
 				total += horsey.delta;
 				break;
 			case SAVE:
-				greedy = Utils.findAccount(accounts, horsey.tagarg1);
+				greedy = Utils.findAccount(accounts, otd.accountname);
 				if (greedy == null){
-					greedy = new SavingAccount(horsey.tagarg1);
+					greedy = new SavingAccount(otd.accountname);
 					accounts.add(greedy);
 				}
 				greedy.balance -= horsey.delta; //add operation delta to saving account
 				balance += horsey.delta;        //remove operation delta from available funds
 				break;
+			case INVEST:
+				greedy = Utils.findAccount(accounts, otd.accountname);
+				if (greedy == null){
+					greedy = new SavingAccount(otd.accountname);
+					accounts.add(greedy);
+				}
+				greedy.balance -= horsey.delta; //add operation delta to saving account
+				balance += horsey.delta;
+				total += horsey.delta;
+				break;
 			case USE:
-				greedy = Utils.findAccount(accounts, horsey.tagarg1);
+				greedy = Utils.findAccount(accounts, otd.accountname);
 				if (greedy != null){
-					balance += greedy.balance - horsey.tagargnum; //add fred funds to available
-					total -= horsey.tagargnum;                    //remove spent money from card
+					balance += greedy.balance - otd.value; //add fred funds to available
+					total -= otd.value;                    //remove spent money from card
 					accounts.remove(greedy);
 				}
 				break;
 			case KILL:
-				greedy = Utils.findAccount(accounts, horsey.tagarg1);
+				greedy = Utils.findAccount(accounts, otd.accountname);
 				if (greedy != null){
 					balance += greedy.balance;
 					accounts.remove(greedy);
@@ -134,12 +180,18 @@ public class MainActivity extends Activity {
 			sb.append(": ");
 			sb.append(sa.balance);
 		}
+		if (tagquery != null){
+			sb.append('\n');
+			sb.append('\n');
+			sb.append("Query balance: ");
+			sb.append(searchBalance);
+		}
 		fundsAvailable.setText(sb.toString());
 	}
 	
 	public void add(Operation operation){
 		operations.add(operation);
-		syncOperations();
+		syncOperations(null);
 		Utils.save(this, operations, null);
 	}
 	
@@ -147,16 +199,16 @@ public class MainActivity extends Activity {
 		int knife = operations.indexOf(source);
 		operations.remove(source);
 		operations.add(knife, noperation);
-		syncOperations();
+		syncOperations(null);
 		Utils.save(this, operations, null);
 	}
 	
 	public void remove(Operation operation){
 		operations.remove(operation);
-		syncOperations();
+		syncOperations(null);
 		Utils.save(this, operations, null);
 	}
-	
+
 	public void export(){
 		StringBuilder sb = new StringBuilder();
 		for (Operation whitehors: operations){
@@ -171,5 +223,12 @@ public class MainActivity extends Activity {
 			sb.append('\n');
 		}
 		Utils.copy(this, sb.toString());
+		
+		Utils.save(this, operations, "/stoarge/sdcard0/backup.sbl");
+	}
+	
+	public void dbimport(){
+		operations = Utils.load(this, "/stoarge/sdcard0/backup.sbl");
+		syncOperations(null);
 	}
 }

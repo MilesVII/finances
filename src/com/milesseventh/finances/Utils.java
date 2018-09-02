@@ -57,10 +57,17 @@ public class Utils {
 				return tag.split(":")[1];
 		return null;
 	}
-	
+
 	public static boolean contains(ArrayList<String> source, String target){
 		for (String runhorsey: source)
 			if (runhorsey.equals(target))
+				return true;
+		return false;
+	}
+	
+	public static boolean containsPartial(ArrayList<String> source, String target){
+		for (String runhorsey: source)
+			if (runhorsey.startsWith(target))
 				return true;
 		return false;
 	}
