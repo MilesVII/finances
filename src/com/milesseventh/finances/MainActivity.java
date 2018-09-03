@@ -96,7 +96,9 @@ public class MainActivity extends Activity {
 		syncOperations(query);
 	}
 	
+	public String lastUsedSyncArgument = null;
 	public void syncOperations(String tagquery){
+		lastUsedSyncArgument = tagquery;
 		if (tagquery == null){
 			newOperation.setText("Log Operation");
 			newOperation.setOnClickListener(logOperationButton);;
@@ -199,7 +201,7 @@ public class MainActivity extends Activity {
 		int knife = operations.indexOf(source);
 		operations.remove(source);
 		operations.add(knife, noperation);
-		syncOperations(null);
+		syncOperations(lastUsedSyncArgument);
 		Utils.save(this, operations, null);
 	}
 	
