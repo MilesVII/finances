@@ -20,12 +20,14 @@ public class Operation implements Serializable {
 	                        STID_USE = 1,
 	                        STID_KILL = 2,
 	                        STID_INVEST = 3,
-	                        STID_TRANSFER = 4;
+	                        STID_LOAN = 4,
+	                        STID_TRANSFER = 5;
 	public static final String[] SPECIAL_TAGS = {
 		"save",    //save:accountname
 		"use",     //use:accountname:value
 		"kill",    //kill:accountname
 		"invest",  //invest:accountname
+		"loan",  //invest:accountname
 		"trans"    //trans:from:to
 	};
 	
@@ -89,7 +91,8 @@ public class Operation implements Serializable {
 				r.type = Type.KILL;
 				return r;
 			}
-			if (tag.startsWith(SPECIAL_TAGS[STID_INVEST]) &&
+			if ((tag.startsWith(SPECIAL_TAGS[STID_INVEST]) || 
+			    tag.startsWith(SPECIAL_TAGS[STID_LOAN])) &&
 			    tag.split(":").length >= 2){
 				r.accountname = tag.split(":")[1];
 				r.type = Type.INVEST;

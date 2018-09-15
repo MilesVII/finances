@@ -1,5 +1,6 @@
 package com.milesseventh.finances;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -14,13 +15,21 @@ import android.widget.Toast;
 
 public class Utils {
 	private static String ACTIVE_DB = "active";
-	
+	public static final int IMPORT_REQUEST = 77279;
 	/*
 	 * Use null as database name to save active base
 	 */
-	public static void save(Context ctxt, ArrayList<Operation> data, String base){
+	public static void save(Context ctxt, ArrayList<Operation> data, File base){
 		try {
-			FileOutputStream fos = ctxt.openFileOutput(base == null ? ACTIVE_DB : base, Context.MODE_PRIVATE);
+			//FileOutputStream fos = ctxt.openFileOutput(base == null ? ACTIVE_DB : base, Context.MODE_PRIVATE);
+			FileOutputStream fos;
+			if (base == null){
+				fos = ctxt.openFileOutput(ACTIVE_DB, Context.MODE_PRIVATE);
+			} else {
+				base.delete();
+				base.createNewFile();
+				fos = new FileOutputStream(base);//ctxt.openFileInput(new File(base));
+			}
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(data);
 			oos.close();
@@ -37,7 +46,12 @@ public class Utils {
 	public static ArrayList<Operation> load(Context ctxt, String base){
 		ArrayList<Operation> r;
 		try{
-			FileInputStream fos = ctxt.openFileInput(base == null ? ACTIVE_DB : base);
+			FileInputStream fos;
+			if (base == null){
+				fos = ctxt.openFileInput(ACTIVE_DB);
+			} else {
+				fos = new FileInputStream(new File(base));//ctxt.openFileInput(new File(base));
+			}
 			ObjectInputStream oos = new ObjectInputStream(fos);
 			r = (ArrayList<Operation>)oos.readObject();
 			oos.close();
@@ -72,8 +86,8 @@ public class Utils {
 		return false;
 	}
 	
-	public static SavingAccount findAccount(ArrayList<SavingAccount> source, String target){
-		for (SavingAccount runhorsey: source)
+	public static Account findAccount(ArrayList<Account> source, String target){
+		for (Account runhorsey: source)
 			if (runhorsey.name.equals(target))
 				return runhorsey;
 		return null;

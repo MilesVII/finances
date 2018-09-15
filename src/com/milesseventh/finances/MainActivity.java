@@ -1,9 +1,16 @@
 package com.milesseventh.finances;
 
+import java.io.File;
 import java.util.ArrayList;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,7 +24,7 @@ public class MainActivity extends Activity {
 	private Button newOperation;
 	private TextView fundsAvailable;
 	private ArrayList<Operation> operations;
-	public ArrayList<SavingAccount> accounts = new ArrayList<SavingAccount>();
+	public ArrayList<Account> accounts = new ArrayList<Account>();
 	public static MainActivity antistatic;
 
 	private OnClickListener logOperationButton = new OnClickListener(){
@@ -48,6 +55,12 @@ public class MainActivity extends Activity {
 		operationsList = (LinearLayout)findViewById(R.id.main_list);
 		operations = Utils.load(this, null);
 		syncOperations(null);
+		
+		if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+		    != PackageManager.PERMISSION_GRANTED) {
+			Utils.shout("It says \"Go fuck yourself\"");
+		}
+		ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 734);
 	}
 	
 	@Override
@@ -66,13 +79,17 @@ public class MainActivity extends Activity {
 			export();
 			break;
 		case (R.id.mm_import):
-			dbimport();
+			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+			intent.addCategory(Intent.CATEGORY_DEFAULT);
+			intent.setType("file/*");
+			startActivityForResult(intent, Utils.IMPORT_REQUEST);
+			//dbimport();
 			break;
 		case (R.id.mm_specialtags):
-			Utils.shout("Use #save:<name> tag to transfer digits to your saving account\n"
-			          + "#invest:<name> add real money to investment account"
+			Utils.shout("Use #save:<name> tag to reserve part of funds\n"
 			          + "#use:<name>:<price> when buying goods using before-saved money\n"
-			          + "#kill:<name> to liquidate saving account and make it's savings available");
+			          + "#kill:<name> to liquidate saving-marked account and make it's savings available\n"
+			          + "#invest:<name> or #loan:<borrower> add real money to investment-marked account\n");
 			break;
 		case (R.id.mm_search):
 			SearchDialog sd = new SearchDialog();
@@ -122,7 +139,7 @@ public class MainActivity extends Activity {
 
 		//Process savings balance
 		int balance = 0, total = 0;;
-		SavingAccount greedy;
+		Account greedy;
 		
 		for (Operation horsey: operations){
 			Operation.OTDContainer otd = horsey.getType();
@@ -134,7 +151,7 @@ public class MainActivity extends Activity {
 			case SAVE:
 				greedy = Utils.findAccount(accounts, otd.accountname);
 				if (greedy == null){
-					greedy = new SavingAccount(otd.accountname);
+					greedy = new Account(otd.accountname, Account.Marker.SAVING);
 					accounts.add(greedy);
 				}
 				greedy.balance -= horsey.delta; //add operation delta to saving account
@@ -143,10 +160,12 @@ public class MainActivity extends Activity {
 			case INVEST:
 				greedy = Utils.findAccount(accounts, otd.accountname);
 				if (greedy == null){
-					greedy = new SavingAccount(otd.accountname);
+					greedy = new Account(otd.accountname, Account.Marker.RETURNABLE);
 					accounts.add(greedy);
 				}
 				greedy.balance -= horsey.delta; //add operation delta to saving account
+				if (greedy.balance == 0)
+					accounts.remove(greedy);
 				balance += horsey.delta;
 				total += horsey.delta;
 				break;
@@ -175,8 +194,8 @@ public class MainActivity extends Activity {
 		sb.append(balance);
 		sb.append(" (");
 		sb.append(total);
-		sb.append(" on card)\nSaving Accounts:");
-		for (SavingAccount sa: accounts){
+		sb.append(" on card)\nAccounts:");
+		for (Account sa: accounts){
 			sb.append('\n');
 			sb.append(sa.name);
 			sb.append(": ");
@@ -212,7 +231,7 @@ public class MainActivity extends Activity {
 	}
 
 	public void export(){
-		StringBuilder sb = new StringBuilder();
+		/*StringBuilder sb = new StringBuilder();
 		for (Operation whitehors: operations){
 			sb.append(Integer.toString(whitehors.delta));
 			sb.append('\n');
@@ -224,13 +243,22 @@ public class MainActivity extends Activity {
 			}
 			sb.append('\n');
 		}
-		Utils.copy(this, sb.toString());
-		
-		Utils.save(this, operations, "/stoarge/sdcard0/backup.sbl");
+		Utils.copy(this, sb.toString());*/
+		File target = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "backup.sbl");
+		Utils.shout(target.getAbsolutePath());
+		Utils.save(this, operations, target);
 	}
 	
-	public void dbimport(){
-		operations = Utils.load(this, "/stoarge/sdcard0/backup.sbl");
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data){
+		if (requestCode == Utils.IMPORT_REQUEST && resultCode == RESULT_OK){
+			Utils.shout(data.getData().getPath());
+			dbimport(data.getData().getPath()/*data.getDataString()*/);
+		}
+	}
+	
+	public void dbimport(String filename){
+		operations = Utils.load(this, filename);
 		syncOperations(null);
 	}
 }
