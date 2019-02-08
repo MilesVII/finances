@@ -2,6 +2,9 @@ package com.milesseventh.finances;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
+
+import com.jjoe64.graphview.series.DataPoint;
 
 import android.Manifest;
 import android.app.Activity;
@@ -26,7 +29,7 @@ public class MainActivity extends Activity {
 	private ArrayList<Operation> operations;
 	public ArrayList<Account> accounts = new ArrayList<Account>();
 	public static MainActivity antistatic;
-
+	public static DataPoint[] plotData;
 	private OnClickListener logOperationButton = new OnClickListener(){
 			@Override
 			public void onClick(View unused) {
@@ -59,8 +62,8 @@ public class MainActivity extends Activity {
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
 		    != PackageManager.PERMISSION_GRANTED) {
 			Utils.shout("It says \"Go fuck yourself\"");
+			ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 734);
 		}
-		ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 734);
 	}
 	
 	@Override
@@ -74,6 +77,10 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()){
 		case (R.id.mm_month):
 			Utils.shout("Feature is to be deleted");
+			break;
+		case (R.id.mm_plot):
+			PlotDialog pd = new PlotDialog();
+			pd.show(getFragmentManager(), "");
 			break;
 		case (R.id.mm_export):
 			export();
@@ -137,6 +144,11 @@ public class MainActivity extends Activity {
 			}
 		}
 
+		//Plotting init
+		ArrayList<DataPoint> dps = new ArrayList<DataPoint>();
+		int plottingPeriod = -1;
+		Calendar tCalendar = Calendar.getInstance();
+		
 		//Process savings balance
 		int balance = 0, total = 0;;
 		Account greedy;
@@ -187,7 +199,34 @@ public class MainActivity extends Activity {
 			default:
 				break;
 			}
+			
+			//Plotting DP update
+			tCalendar.setTime(horsey.timeStamp);
+			int currentPeriod = tCalendar.get(Calendar.WEEK_OF_YEAR);
+			if (currentPeriod != plottingPeriod){
+				if (plottingPeriod == -1){
+					plottingPeriod = currentPeriod;
+					continue;
+				}
+				int invs = 0;
+				for (Account acc: accounts){
+					if (acc.marker == Account.Marker.RETURNABLE)
+						invs += acc.balance;
+				}
+				dps.add(new DataPoint(plottingPeriod, total + invs));
+				//Yearshift //Or we just traveled back in time //Or operations order is just fucked up
+				if (plottingPeriod > currentPeriod){
+					//TODO: Aaaaa don't wanna do anything here but I have to
+				}
+				//Add points in gaps if operations not present
+				for (int i = plottingPeriod + 1; i < currentPeriod; ++i)
+					dps.add(new DataPoint(i, total + invs));
+				plottingPeriod = currentPeriod;
+			}
 		}
+		
+		//Saving plot data
+		plotData = dps.toArray(new DataPoint[dps.size()]);
 		
 		////////////////////////////////////
 		StringBuilder sb = new StringBuilder("Available: ");

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/mm_month" android:title="New month"></item>
+    <item android:id="@+id/mm_month" android:title="New month"></item><item android:id="@+id/mm_plot" android:title="View Dat Plot"></item>
     <item android:id="@+id/mm_search" android:title="Search"></item><item android:id="@+id/mm_export" android:title="Export"></item><item android:id="@+id/mm_import" android:title="Import"></item>
     <item android:id="@+id/mm_specialtags" android:title="Special tags"></item>
+    
     
     
     
