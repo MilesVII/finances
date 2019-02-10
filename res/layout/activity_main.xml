@@ -24,7 +24,7 @@
             android:id="@+id/add_operation"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Log operation" />
+            android:text="Log moth" />
 
         <ScrollView
             android:id="@+id/ao_scroll_unused"

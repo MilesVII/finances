@@ -14,17 +14,15 @@ import android.content.Context;
 import android.widget.Toast;
 
 public class Utils {
-	private static String ACTIVE_DB = "active";
+	private static String ACTIVE_MOTH_DB = "moths";
 	public static final int IMPORT_REQUEST = 77279;
-	/*
-	 * Use null as database name to save active base
-	 */
-	public static void save(Context ctxt, ArrayList<Operation> data, File base){
+	
+	public static void saveMoth(Context ctxt, ArrayList<Moth> data, File base){
 		try {
 			//FileOutputStream fos = ctxt.openFileOutput(base == null ? ACTIVE_DB : base, Context.MODE_PRIVATE);
 			FileOutputStream fos;
 			if (base == null){
-				fos = ctxt.openFileOutput(ACTIVE_DB, Context.MODE_PRIVATE);
+				fos = ctxt.openFileOutput(ACTIVE_MOTH_DB, Context.MODE_PRIVATE);
 			} else {
 				base.delete();
 				base.createNewFile();
@@ -40,56 +38,25 @@ public class Utils {
 	}
 
 	@SuppressWarnings("unchecked")
-	/*
-	 * Use null as database name to load active base
-	 */
-	public static ArrayList<Operation> load(Context ctxt, String base){
-		ArrayList<Operation> r;
+	public static ArrayList<Moth> loadMoth(Context ctxt, String base){
+		ArrayList<Moth> r;
 		try{
 			FileInputStream fos;
 			if (base == null){
-				fos = ctxt.openFileInput(ACTIVE_DB);
+				fos = ctxt.openFileInput(ACTIVE_MOTH_DB);
 			} else {
 				fos = new FileInputStream(new File(base));//ctxt.openFileInput(new File(base));
 			}
 			ObjectInputStream oos = new ObjectInputStream(fos);
-			r = (ArrayList<Operation>)oos.readObject();
+			r = (ArrayList<Moth>)oos.readObject();
 			oos.close();
 			fos.close();
 			return r;
 		} catch (FileNotFoundException fnfex){
-			return new ArrayList<Operation>();
+			return new ArrayList<Moth>();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		return null;
-	}
-
-	public static String checkSpecialTag(ArrayList<String> tags, String stag){
-		for (String tag: tags)
-			if (tag.startsWith(stag) && tag.contains(":"))
-				return tag.split(":")[1];
-		return null;
-	}
-
-	public static boolean contains(ArrayList<String> source, String target){
-		for (String runhorsey: source)
-			if (runhorsey.equals(target))
-				return true;
-		return false;
-	}
-	
-	public static boolean containsPartial(ArrayList<String> source, String target){
-		for (String runhorsey: source)
-			if (runhorsey.startsWith(target))
-				return true;
-		return false;
-	}
-	
-	public static Account findAccount(ArrayList<Account> source, String target){
-		for (Account runhorsey: source)
-			if (runhorsey.name.equals(target))
-				return runhorsey;
 		return null;
 	}
 	
@@ -106,16 +73,34 @@ public class Utils {
 		});
 	}
 	
-	public static String sanitizeTag(String tag){
-		return tag.split(" ")[0].replace('#', ' ').toLowerCase().trim();
-	}
-	
-	public static boolean isParseable(String data){
-		try{
-			Integer.parseInt(data);
-			return true;
-		} catch (Exception e){
-			return false;
+	public static String getMonthName(int m){
+		switch(m){
+		case 0:
+			return "January";
+		case 1:
+			return "February";
+		case 2:
+			return "March";
+		case 3:
+			return "Avril";
+		case 4:
+			return "May";
+		case 5:
+			return "June";
+		case 6:
+			return "July";
+		case 7:
+			return "August";
+		case 8:
+			return "September";
+		case 9:
+			return "October";
+		case 10:
+			return "November";
+		case 11:
+			return "December";
+		default:
+			return "wat";
 		}
 	}
 }
