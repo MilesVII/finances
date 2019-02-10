@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
 			public void onClick(View unused) {
 				Moth m = new Moth();
 				Calendar c = Calendar.getInstance();
-				m.name = Utils.getMonthName(c.get(Calendar.MONTH)) + " " + (1900 +  c.get(Calendar.YEAR));
+				m.name = Utils.getMonthName(c.get(Calendar.MONTH)) + " " + c.get(Calendar.YEAR);
 				openMothEditor(m);
 			}
 		};
@@ -69,11 +69,6 @@ public class MainActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()){
-		case (R.id.mm_month):
-			Utils.shout("Feature was meant to be deleted, but it is the only feature available");
-			break;
-		case (R.id.mm_plot):
-			break;
 		case (R.id.mm_export):
 			export();
 			break;
@@ -90,9 +85,12 @@ public class MainActivity extends Activity {
 	public String lastUsedSyncArgument = null;
 	public void sync(){
 		ArrayList<Delta> sumLoans = new ArrayList<Delta>();
+		float sumEff = 0;
 		for (Moth m: moths){
 			m.calculate();
+			sumEff += m.getEfficiency();
 			
+			//loans
 			for (Delta scanned: m.spentOnLoans){
 				Delta existingEntry = null;
 				
@@ -114,7 +112,7 @@ public class MainActivity extends Activity {
 		}
 		
 		//Generate loans report
-		String report = "";
+		String report = String.format("Average efficiency: %.2f%%\n", sumEff * 100f / (float)moths.size());
 		for (Delta entry: sumLoans)
 			if (entry.delta != 0)
 				report += entry.comment + ": " + entry.delta + "\n";
@@ -130,6 +128,7 @@ public class MainActivity extends Activity {
 
 	public void export(){
 		File target = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "backup.sbx");
+		Utils.saveMoth(this, moths, target);
 		Utils.shout(target.getAbsolutePath());
 	}
 	

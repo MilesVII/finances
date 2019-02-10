@@ -18,7 +18,8 @@ import android.widget.TextView;
 
 public class LogMothDialog extends DialogFragment {
 	private final LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-	private final LayoutParams fieldlp = new LayoutParams(0, LayoutParams.MATCH_PARENT, .5f);
+	private final LayoutParams fieldlp = new LayoutParams(0, LayoutParams.WRAP_CONTENT, .4f);
+	private final LayoutParams xlp = new LayoutParams(0, LayoutParams.WRAP_CONTENT, .15f);
 	public class DeltaEntryView extends LinearLayout{
 		public static final int DELTA_FIELD_ID = 77200;
 		public static final int NAME_FIELD_ID = 77201;
@@ -63,7 +64,7 @@ public class LogMothDialog extends DialogFragment {
 		final TextView tv = new TextView(getContext());
 		String details = String.format("Income: %d\nExpenses: %s\nEfficiency: %.2f%%\nPrevious balance: %d",
 		                               moth.sum(moth.cleanIncome), moth.processUndef(moth.expenses), 
-		                               moth.getEfficiency(), moth.previousBalance);
+		                               moth.getEfficiency() * 100f, moth.previousBalance);
 		tv.setText(details);
 		layout.addView(tv);
 		
@@ -87,7 +88,7 @@ public class LogMothDialog extends DialogFragment {
 		layout.addView(subLayoutCI);
 		
 		Button bAddIncome = new Button(getContext());
-		bAddIncome.setText("Add clear income");
+		bAddIncome.setText("Add clean income");
 		bAddIncome.setOnClickListener(new View.OnClickListener(){
 			@Override
 			public void onClick(View arg0) {
@@ -187,19 +188,20 @@ public class LogMothDialog extends DialogFragment {
 		return builder.create();
 	}
 
-	private DeltaEntryView generateEntry(String name, final LinearLayout parent, Delta delta){
+	private DeltaEntryView generateEntry(String hint, final LinearLayout parent, Delta delta){
 		final DeltaEntryView layout = new DeltaEntryView(getContext());
 		layout.setLayoutParams(lp);
 		layout.setOrientation(LinearLayout.HORIZONTAL);
 		
 		EditText nameField = new EditText(getContext());
 		nameField.setLayoutParams(fieldlp);
-		nameField.setHint(name);
+		nameField.setHint(hint);
+		nameField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL);
 		nameField.setId(DeltaEntryView.NAME_FIELD_ID);
 		
 		EditText deltaField = new EditText(getContext());
 		deltaField.setLayoutParams(fieldlp);
-		deltaField.setHint(name);
+		deltaField.setHint("Delta");
 		deltaField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_NUMBER_VARIATION_NORMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
 		deltaField.setId(DeltaEntryView.DELTA_FIELD_ID);
 		
@@ -210,6 +212,7 @@ public class LogMothDialog extends DialogFragment {
 		
 		Button bDelete = new Button(getContext());
 		bDelete.setText("X");
+		bDelete.setLayoutParams(xlp);
 		bDelete.setOnClickListener(new View.OnClickListener(){
 			@Override
 			public void onClick(View arg0) {
