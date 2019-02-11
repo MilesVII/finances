@@ -79,7 +79,7 @@ public class LogMothDialog extends DialogFragment {
 		//Clean income
 		
 		final TextView tClearIncome = new TextView(getContext());
-		tClearIncome.setText("Clear income:");
+		tClearIncome.setText("Clean income:");
 		layout.addView(tClearIncome);
 		
 		final LinearLayout subLayoutCI = new LinearLayout(getContext());

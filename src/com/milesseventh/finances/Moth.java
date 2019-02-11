@@ -33,8 +33,14 @@ public class Moth implements Serializable {
 		return sum(cleanIncome) + sum(unregisteredIncome) - (expenses - -sum(spentOnLoans));
 	}
 	
+	public static float getEfficiency(int balance, int previousBalance, int spentOnLoans, int cleanIncome){
+		//return 1f - (expenses - spentOnLoans) / (float)cleanIncome;
+		return (balance - previousBalance + spentOnLoans) / (float)cleanIncome;
+	}
+	
 	public float getEfficiency(){
-		return 1f - (expenses - sum(spentOnLoans)) / (float)sum(cleanIncome);
+		return getEfficiency(balance, previousBalance, sum(spentOnLoans), sum(cleanIncome));
+		//return 1f - (expenses - sum(spentOnLoans)) / (float)sum(cleanIncome);
 	}
 
 	public String processUndef(int in){

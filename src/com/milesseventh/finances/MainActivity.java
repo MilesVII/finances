@@ -49,7 +49,6 @@ public class MainActivity extends Activity {
 		newOperation.setOnClickListener(logOperationButton);
 		
 		viewList = (LinearLayout)findViewById(R.id.main_list);
-		//operations = Utils.load(this, null);
 		moths = Utils.loadMoth(this, null);
 		sync();
 		
@@ -85,10 +84,12 @@ public class MainActivity extends Activity {
 	public String lastUsedSyncArgument = null;
 	public void sync(){
 		ArrayList<Delta> sumLoans = new ArrayList<Delta>();
-		float sumEff = 0;
+		int sumInc = 0, sumLoan = 0, lastBalance = 0;
 		for (Moth m: moths){
 			m.calculate();
-			sumEff += m.getEfficiency();
+			sumInc += m.sum(m.cleanIncome);
+			sumLoan += m.sum(m.spentOnLoans);
+			lastBalance = m.balance;
 			
 			//loans
 			for (Delta scanned: m.spentOnLoans){
@@ -112,7 +113,9 @@ public class MainActivity extends Activity {
 		}
 		
 		//Generate loans report
-		String report = String.format("Average efficiency: %.2f%%\n", sumEff * 100f / (float)moths.size());
+		String report = String.format("Average efficiency: %.2f%%\nTotal income: %d\nLoaned: %d\n", 
+		                              Moth.getEfficiency(lastBalance, 0, sumLoan, sumInc) * 100f,
+		                              sumInc, sumLoan);
 		for (Delta entry: sumLoans)
 			if (entry.delta != 0)
 				report += entry.comment + ": " + entry.delta + "\n";
