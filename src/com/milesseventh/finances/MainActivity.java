@@ -84,11 +84,12 @@ public class MainActivity extends Activity {
 	public String lastUsedSyncArgument = null;
 	public void sync(){
 		ArrayList<Delta> sumLoans = new ArrayList<Delta>();
-		int sumInc = 0, sumLoan = 0, lastBalance = 0;
+		int sumInc = 0, sumLoan = 0, sumUnregistered = 0, lastBalance = 0;
 		for (Moth m: moths){
 			m.calculate();
 			sumInc += m.sum(m.cleanIncome);
 			sumLoan += m.sum(m.spentOnLoans);
+			sumUnregistered += m.sum(m.unregisteredIncome);
 			lastBalance = m.balance;
 			
 			//loans
@@ -114,7 +115,7 @@ public class MainActivity extends Activity {
 		
 		//Generate loans report
 		String report = String.format("Average efficiency: %.2f%%\nTotal income: %d\nLoaned: %d\n", 
-		                              Moth.getEfficiency(lastBalance, 0, sumLoan, sumInc) * 100f,
+		                              Moth.getEfficiency(lastBalance, 0, sumLoan, sumUnregistered, sumInc) * 100f,
 		                              sumInc, sumLoan);
 		for (Delta entry: sumLoans)
 			if (entry.delta != 0)
@@ -155,13 +156,17 @@ public class MainActivity extends Activity {
 	}
 	
 	public boolean mothRegistered(Moth m){
-		return moths.contains(m);
+		return moths.contains(m) || moths.get(moths.size() - 1).name.equalsIgnoreCase(m.name);
 	}
 	
 	public void registerMoth(Moth m){
 		if (!mothRegistered(m)){
 			moths.add(m);
 		}
+	}
+	
+	public Moth getLastMoth(){
+		return moths.get(moths.size() - 1);
 	}
 	
 	public Moth requestPreviousMoth(Moth m){

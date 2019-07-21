@@ -18,14 +18,23 @@ public class MothView extends LinearLayout {
 		setLayoutParams(lp);
 		data = nd;
 		
-		Button bEdit = new Button(context);
+		final Button bEdit = new Button(context);
 		bEdit.setLayoutParams(lp);
 		bEdit.setText(data.name);
 		bEdit.setTextColor(Color.rgb(32, 184, 255));
+		bEdit.setLongClickable(true);
 		bEdit.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View arg0) {
+				if (MainActivity.antistatic.getLastMoth() == data)
+					MainActivity.antistatic.openMothEditor(data);
+			}
+		});
+		bEdit.setOnLongClickListener(new OnLongClickListener(){
+			@Override
+			public boolean onLongClick(View arg0) {
 				MainActivity.antistatic.openMothEditor(data);
+				return true;
 			}
 		});
 		addView(bEdit);

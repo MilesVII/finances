@@ -179,8 +179,7 @@ public class LogMothDialog extends DialogFragment {
 				}
 				moth.calculate();
 				
-				if (!MainActivity.antistatic.mothRegistered(moth))
-					MainActivity.antistatic.registerMoth(moth);
+				MainActivity.antistatic.registerMoth(moth);
 				
 				MainActivity.antistatic.sync();
 			}
